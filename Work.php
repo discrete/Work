@@ -38,18 +38,16 @@ class WorkPlugin extends MantisPlugin {
 	
 	function hooks() {
 		return array(
-			'EVENT_VIEW_BUG_EXTRA'		=> 'view',
+			'EVENT_VIEW_BUG_EXTRA'		=> 'list_unitwork',
 		);
 	}
 	
 	function schema() {
-		
+		return array();
 	}
 	
-	function view($p_event, $p_bug_id){
-		require_once('work.ViewAPI.php');
-		
-		
-
+	function list_unitwork($p_event, $p_bug_id){
+		include('Work_view_inc.php');
+		include('Work_add_inc.php');
 	} #end of display_work
 }
