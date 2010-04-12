@@ -22,7 +22,7 @@ class WorkPlugin extends MantisPlugin {
 		$this->name = 'Work';
 		$this->description = 'We can manage time very well';
 
-		$this->version = '0.1';
+		$this->version = '0.2';
 		$this->requires = array(
 			'MantisCore' => '1.2.0',
 		);
@@ -30,6 +30,10 @@ class WorkPlugin extends MantisPlugin {
 		$this->author	= 'Joohong Kim';
 		$this->contact	= 'joohong.kim@access-company.com';
 		$this->url		= 'http://www.access-company.com';
+	}
+	
+	function config() {
+		return array();	
 	}
 
 	function event() {
@@ -43,7 +47,30 @@ class WorkPlugin extends MantisPlugin {
 	}
 	
 	function schema() {
-		return array();
+		return array(
+			array ( 'CreateTableSQL',
+				array( plugin_table( 'type' ), "
+					id				I		NOTNULL UNSIGNED AUTOINCREMENT PRIMARY,
+					author_id		I		NOTNULL UNSIGNED DEFAULT '0',
+					project_id		I		NOTNULL UNSIGNED DEFAULT '0',
+					name			varchar(128)	NOTNULL,
+					date_submitted	T		NOTNULL,
+					date_updated	T		NOTNULL
+				" )
+			),
+			array( 'CreateTableSQL',
+				array( plugin_table( 'journal' ), "
+					id				I		NOTNULL UNSIGNED AUTOINCREMENT PRIMARY,
+					bug_id			I		NOTNULL UNSIGNED DEFAULT '0',
+					author_id		I		NOTNULL UNSIGNED DEFAULT '0',
+					project_id		I		NOTNULL UNSIGNED DEFAULT '0',
+					work_id			I		NOTNULL UNSIGNED DEFAULT '0',
+					man_day			I		NOTNULL UNSIGNED DEFAULT '0',
+					date_submitted	T		NOTNULL,
+					date_updated	T		NOTNULL
+				" )
+			),
+		);
 	}
 	
 	function list_unitwork($p_event, $p_bug_id){
