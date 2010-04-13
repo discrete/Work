@@ -18,10 +18,12 @@ require_once( config_get_global( 'class_path' ) . 'MantisPlugin.class.php' );
  * with the Mantis bug tracker software.
  */ 
 class WorkPlugin extends MantisPlugin {
-	function register() {
+	function register()
+	{
 		$this->name = 'Work';
 		$this->description = 'We can manage time very well';
-
+		$this->page = 'config';
+		
 		$this->version = '0.2';
 		$this->requires = array(
 			'MantisCore' => '1.2.0',
@@ -32,21 +34,26 @@ class WorkPlugin extends MantisPlugin {
 		$this->url		= 'http://www.access-company.com';
 	}
 	
-	function config() {
-		return array();	
+	function config()
+	{
+		return array(
+		);	
 	}
 
-	function event() {
+	function event()
+	{
 	
 	}
 	
-	function hooks() {
+	function hooks()
+	{
 		return array(
 			'EVENT_VIEW_BUG_EXTRA'		=> 'list_unitwork',
 		);
 	}
 	
-	function schema() {
+	function schema()
+	{
 		return array(
 			array ( 'CreateTableSQL',
 				array( plugin_table( 'type' ), "
@@ -71,6 +78,11 @@ class WorkPlugin extends MantisPlugin {
 				" )
 			),
 		);
+	}
+	
+	function uninstall()
+	{
+	
 	}
 	
 	function list_unitwork($p_event, $p_bug_id){

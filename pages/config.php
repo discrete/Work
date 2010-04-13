@@ -14,6 +14,55 @@
 # You should have received a copy of the GNU General Public License
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
+function worktype_get_all_rows($p_project_id)
+{
+	$c_project_id = db_prepare_int( $p_project_id );
+
+	$t_type_table = plugin_table( 'type' );
+	$t_project_table = db_get_table( 'mantis_project_table' );
+
+	if ( $c_project_id == ALL_PROJECTS ) {
+		$t_inherit = false;
+	}
+	else {
+		$t_inherit = false;
+	}
+
+	if ( $t_inherit ) {
+		$t_project_ids = project_hierarchy_inheritance( $p_project_id );
+		$t_project_where = ' project_id IN ( ' . implode( ', ', $t_project_ids ) . ' ) ';
+	}
+	else {
+		$t_project_where = ' project_id=' . $p_project_id . ' ';
+	}
+
+	$query = "SELECT t.*, p.name AS project_name FROM $t_type_table AS t
+				LEFT JOIN $t_project_table AS p
+					ON t.project_id=p.id
+				WHERE $t_project_where
+				ORDER BY t.name ";
+	$result = db_query_bound( $query );
+	$count = db_num_rows( $result );
+	$rows = array();
+	for( $i = 0;$i < $count;$i++ ) {
+		$row = db_fetch_array( $result );
+
+		$rows[] = $row;
+	}
+
+	if( $p_sort_by_project ) {
+		/*
+		category_sort_rows_by_project( $p_project_id );
+		usort( $rows, 'category_sort_rows_by_project' );
+		category_sort_rows_by_project( null );
+		*/
+	}
+
+	return $rows;
+}
+?>
+
+<?php
 auth_reauthenticate( );
 access_ensure_global_level( config_get( 'manage_plugin_threshold' ) );
 
@@ -23,82 +72,99 @@ print_manage_menu( );
 
 ?>
 
-<br/>
-<form action="<?php echo plugin_page( 'config_edit' )?>" method="post">
-<?php echo form_security_field( 'plugin_format_config_edit' ) ?>
-<table align="center" class="width50" cellspacing="1">
+<!-- PROJECT CATEGORIES --> 
+<a name="Work Type" /> 
+<div align="center"> 
+<table class="width75" cellspacing="1"> 
+ 
+<!-- Title --> 
+<tr> 
+	<td class="form-title" colspan="3"> 
+		Categories	</td> 
+</tr> 
+<?php
+	$f_project_id = 1; /* gpc_get_int( 'project_id' ); */
+	$t_worktypes = worktype_get_all_rows( $f_project_id );
 
-<tr>
-	<td class="form-title" colspan="3">
-		<?php echo lang_get( 'plugin_format_title' ) . ': ' . lang_get( 'plugin_format_config' )?>
-	</td>
-</tr>
+	if ( count( $t_worktypes ) > 0 ) {
+?>
+		<tr class="row-category">
+			<td>
+				Type
+			</td>
+			<td>
+				Assign to
+			</td>
+			<td class="center">
+				Action
+			</td>
+		</tr>
+<?php
+	}
+	
+		foreach ( $t_worktypes as $t_worktype ) {
+		$t_id = $t_worktype['id'];
 
-<tr <?php echo helper_alternate_class( )?>>
-	<td class="category" width="60%">
-		<?php echo lang_get( 'plugin_format_process_text' )?>
-		<br /><span class="small"><?php echo lang_get( 'plugin_format_process_text_warning_notice' )?></span>
-	</td>
-	<td class="center" width="20%">
-		<label><input type="radio" name="process_text" value="1" <?php echo( ON == plugin_config_get( 'process_text' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_enabled' )?></label>
-	</td>
-	<td class="center" width="20%">
-		<label><input type="radio" name="process_text" value="0" <?php echo( OFF == plugin_config_get( 'process_text' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_disabled' )?></label>
-	</td>
-</tr>
+		if ( $t_worktype['project_id'] != $f_project_id ) {
+			$t_inherited = true;
+		} else {
+			$t_inherited = false;
+		}
 
-<tr <?php echo helper_alternate_class( )?>>
-	<td class="category">
-		<?php echo lang_get( 'plugin_format_process_urls' )?>
-	</td>
-	<td class="center">
-		<label><input type="radio" name="process_urls" value="1" <?php echo( ON == plugin_config_get( 'process_urls' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_enabled' )?></label>
-	</td>
-	<td class="center">
-		<label><input type="radio" name="process_urls" value="0" <?php echo( OFF == plugin_config_get( 'process_urls' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_disabled' )?></label>
-	</td>
-</tr>
+		$t_name = $t_worktype['name'];
+		if ( NO_USER != $t_worktype['user_id'] && user_exists( $t_worktype['user_id'] )) {
+			$t_user_name = user_get_name( $t_worktype['user_id'] );
+		} else {
+			$t_user_name = '';
+		}
+?>
+<!-- Repeated Info Row -->
+		<tr <?php echo helper_alternate_class() ?>>
+			<td>
+				<?php echo string_display( category_full_name( $t_worktype['id'] , /* showProject */ $t_inherited, $f_project_id ) )  ?>
+			</td>
+			<td>
+				<?php echo string_display_line( $t_user_name ) ?>
+			</td>
+			<td class="center">
+				<?php if ( !$t_inherited ) {
+					$t_id = urlencode( $t_id );
+					$t_project_id = urlencode( $f_project_id );
 
-<tr <?php echo helper_alternate_class( )?>>
-	<td class="category">
-		<?php echo lang_get( 'plugin_format_process_buglinks' )?>
-	</td>
-	<td class="center">
-		<label><input type="radio" name="process_buglinks" value="1" <?php echo( ON == plugin_config_get( 'process_buglinks' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_enabled' )?></label>
-	</td>
-	<td class="center">
-		<label><input type="radio" name="process_buglinks" value="0" <?php echo( OFF == plugin_config_get( 'process_buglinks' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_disabled' )?></label>
-	</td>
-</tr>
-
-<tr <?php echo helper_alternate_class( )?>>
-	<td class="category">
-		<?php echo lang_get( 'plugin_format_process_vcslinks' )?>
-	</td>
-	<td class="center">
-		<label><input type="radio" name="process_vcslinks" value="1" <?php echo( ON == plugin_config_get( 'process_vcslinks' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_enabled' )?></label>
-	</td>
-	<td class="center">
-		<label><input type="radio" name="process_vcslinks" value="0" <?php echo( OFF == plugin_config_get( 'process_vcslinks' ) ) ? 'checked="checked" ' : ''?>/>
-			<?php echo lang_get( 'plugin_format_disabled' )?></label>
-	</td>
-</tr>
-
-<tr>
-	<td class="center" colspan="3">
-		<input type="submit" class="button" value="<?php echo lang_get( 'change_configuration' )?>" />
-	</td>
-</tr>
-
-</table>
-</form>
+					print_button( 'manage_proj_cat_edit_page.php?id=' . $t_id . '&project_id=' . $t_project_id, lang_get( 'edit_link' ) );
+					echo '&nbsp;';
+					print_button( 'manage_proj_cat_delete.php?id=' . $t_id . '&project_id=' . $t_project_id, lang_get( 'delete_link' ) );
+				} ?>
+			</td>
+		</tr>
+<?php
+	} # end for loop
+?>
+<!-- Add Category Form --> 
+<tr> 
+	<td class="left" colspan="3"> 
+		<form method="post" action="manage_proj_cat_add.php"> 
+			<input type="hidden" name="manage_proj_cat_add_token" value="201004139b22334d70f84baf86bd429265273c06ee45ec73"/>			<input type="hidden" name="project_id" value="1" /> 
+			<input type="text" name="name" size="32" maxlength="128" /> 
+			<input type="submit" class="button" value="Add Category" /> 
+		</form> 
+	</td> 
+</tr> 
+ 
+<!-- Copy Categories Form --> 
+<tr> 
+	<td class="left" colspan="3"> 
+		<form method="post" action="manage_proj_cat_copy.php"> 
+			<input type="hidden" name="manage_proj_cat_copy_token" value="20100413d73955e122ac5d9355b614de672c776a22f195b0"/>			<input type="hidden" name="project_id" value="1" /> 
+			<select name="other_project_id"> 
+							</select> 
+			<input type="submit" name="copy_from" class="button" value="Copy Categories From" /> 
+			<input type="submit" name="copy_to" class="button" value="Copy Categories To" /> 
+		</form> 
+	</td> 
+</tr> 
+</table> 
+ 
 
 <?php
 html_page_bottom();
