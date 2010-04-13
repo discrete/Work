@@ -60,6 +60,43 @@ function worktype_get_all_rows($p_project_id)
 
 	return $rows;
 }
+
+function worktype_get_row( $p_worktype_id ) {
+	$c_worktype_id = db_prepare_int( $p_worktype_id );
+
+	$t_worktype_table = plugin_table( 'type' );
+	$t_project_table = db_get_table( 'mantis_project_table' );
+
+	$query = "SELECT * FROM $t_worktype_table
+				WHERE id=" . db_param();
+	$result = db_query_bound( $query, array( $c_worktype_id ) );
+	$count = db_num_rows( $result );
+	if( 0 == $count ) {
+		trigger_error( ERROR_CATEGORY_NOT_FOUND, ERROR );
+	}
+
+	$row = db_fetch_array( $result );
+	return $row;
+}
+
+function worktype_full_name( $p_worktype_id, $p_show_project = true, $p_current_project = null ) {
+	if( 0 == $p_worktype_id ) {
+		# No worktype
+		return 'No Worktype';
+	} else {
+		$t_row = worktype_get_row( $p_worktype_id );
+		$t_project_id = $t_row['project_id'];
+
+		$t_current_project = is_null( $p_current_project ) ? helper_get_current_project() : $p_current_project;
+
+		if( $p_show_project && $t_project_id != $t_current_project ) {
+			return '[' . project_get_name( $t_project_id ) . '] ' . $t_row['name'];
+		}
+
+		return $t_row['name'];
+	}
+}
+
 ?>
 
 <?php
@@ -83,7 +120,7 @@ print_manage_menu( );
 		Work Type	</td> 
 </tr> 
 <?php
-	$f_project_id = 1; /* gpc_get_int( 'project_id' ); */
+	$f_project_id = 0; /* gpc_get_int( 'project_id' ); */
 	$t_worktypes = worktype_get_all_rows( $f_project_id );
 
 	if ( count( $t_worktypes ) > 0 ) {
@@ -121,7 +158,7 @@ print_manage_menu( );
 <!-- Repeated Info Row -->
 		<tr <?php echo helper_alternate_class() ?>>
 			<td>
-				<?php echo string_display( category_full_name( $t_worktype['id'] , /* showProject */ $t_inherited, $f_project_id ) )  ?>
+				<?php echo string_display( worktype_full_name( $t_worktype['id'] , /* showProject */ $t_inherited, $f_project_id ) )  ?>
 			</td>
 			<td>
 				<?php echo string_display_line( $t_user_name ) ?>
@@ -144,7 +181,7 @@ print_manage_menu( );
 <tr> 
 	<td class="left" colspan="3"> 
 		<form method="post" action="<?php echo plugin_page('config_worktype_add.php')?>"> 
-			<input type="hidden" name="project_id" value="1" /> 
+			<input type="hidden" name="project_id" value="<?php echo $f_project_id ?>" /> 
 			<input type="text" name="name" size="32" maxlength="128" /> 
 			<input type="submit" class="button" value="Add Work Type" /> 
 		</form> 
