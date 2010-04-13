@@ -72,15 +72,15 @@ print_manage_menu( );
 
 ?>
 
-<!-- PROJECT CATEGORIES --> 
-<a name="Work Type" /> 
+<!-- PROJECT WorkType --> 
+<a name="WorkType"></a>
 <div align="center"> 
 <table class="width75" cellspacing="1"> 
  
 <!-- Title --> 
 <tr> 
 	<td class="form-title" colspan="3"> 
-		Categories	</td> 
+		Work Type	</td> 
 </tr> 
 <?php
 	$f_project_id = 1; /* gpc_get_int( 'project_id' ); */
@@ -131,22 +131,22 @@ print_manage_menu( );
 					$t_id = urlencode( $t_id );
 					$t_project_id = urlencode( $f_project_id );
 
-					print_button( 'manage_proj_cat_edit_page.php?id=' . $t_id . '&project_id=' . $t_project_id, lang_get( 'edit_link' ) );
+					print_button( plugin_page('config_worktype_edit.php') . '?id=' . $t_id . '&project_id=' . $t_project_id, lang_get( 'edit_link' ) );
 					echo '&nbsp;';
-					print_button( 'manage_proj_cat_delete.php?id=' . $t_id . '&project_id=' . $t_project_id, lang_get( 'delete_link' ) );
+					print_button( plugin_page('config_worktype_delete.php') . '?id=' . $t_id . '&project_id=' . $t_project_id, lang_get( 'delete_link' ) );
 				} ?>
 			</td>
 		</tr>
 <?php
 	} # end for loop
 ?>
-<!-- Add Category Form --> 
+<!-- Add WorkType Form --> 
 <tr> 
 	<td class="left" colspan="3"> 
-		<form method="post" action="manage_proj_cat_add.php"> 
-			<input type="hidden" name="manage_proj_cat_add_token" value="201004139b22334d70f84baf86bd429265273c06ee45ec73"/>			<input type="hidden" name="project_id" value="1" /> 
+		<form method="post" action="<?php echo plugin_page('config_worktype_add.php')?>"> 
+			<input type="hidden" name="project_id" value="1" /> 
 			<input type="text" name="name" size="32" maxlength="128" /> 
-			<input type="submit" class="button" value="Add Category" /> 
+			<input type="submit" class="button" value="Add Work Type" /> 
 		</form> 
 	</td> 
 </tr> 
@@ -164,7 +164,7 @@ print_manage_menu( );
 	</td> 
 </tr> 
 </table> 
- 
+</div>
 
 <?php
 html_page_bottom();
