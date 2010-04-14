@@ -39,8 +39,44 @@ function worktype_get_all_rows( $p_project_id, $p_inherit = null, $p_sort_by_pro
 	return $rows;
 }
 
+function worktype_get_row( $p_worktype_id ) {
+	$c_worktype_id = db_prepare_int( $p_worktype_id );
+
+	$t_worktype_table = plugin_table( 'type' );
+	$t_project_table = db_get_table( 'mantis_project_table' );
+
+	$query = "SELECT * FROM $t_worktype_table
+				WHERE id=" . db_param();
+	$result = db_query_bound( $query, array( $c_worktype_id ) );
+	$count = db_num_rows( $result );
+	if( 0 == $count ) {
+		trigger_error( ERROR_CATEGORY_NOT_FOUND, ERROR );
+	}
+
+	$row = db_fetch_array( $result );
+	return $row;
+}
+
+function worktype_full_name( $p_worktype_id, $p_show_project = true, $p_current_project = null ) {
+	if( 0 == $p_worktype_id ) {
+		# No Category
+		return 'No Worktype';
+	} else {
+		$t_row = worktype_get_row( $p_worktype_id );
+		$t_project_id = $t_row['project_id'];
+
+		$t_current_project = is_null( $p_current_project ) ? helper_get_current_project() : $p_current_project;
+
+		if( $p_show_project && $t_project_id != $t_current_project ) {
+			return '[' . project_get_name( $t_project_id ) . '] ' . $t_row['name'];
+		}
+
+		return $t_row['name'];
+	}
+}
+
 function print_worktype_option_list( $p_worktype_id = 0, $p_project_id = null ) {
-	$t_worktype_table = db_get_table( 'mantis_category_table' );
+	$t_worktype_table = plugin_table( 'type' );
 	$t_project_table = db_get_table( 'mantis_project_table' );
 
 	if( null === $p_project_id ) {
@@ -60,17 +96,17 @@ function print_worktype_option_list( $p_worktype_id = 0, $p_project_id = null ) 
 		$t_worktype_id = $t_worktype_row['id'];
 		echo "<option value=\"$t_worktype_id\"";
 		check_selected( $p_worktype_id, $t_worktype_id );
-		echo '>' . string_attribute( category_full_name( $t_worktype_id, $t_worktype_row['project_id'] != $t_project_id ) ) . '</option>';
+		echo '>' . string_attribute( worktype_full_name( $t_worktype_id, $t_worktype_row['project_id'] != $t_project_id ) ) . '</option>';
 	}
 }
 ?>
 
-<a name="addbugnote"></a> <br />
+<a name="addwork"></a> <br />
 
 <?php
 	collapse_open( 'work_add' );
 ?>
-<form name="workadd" method="post" action="<?php echo plugin_page('Work_add.php')?>">
+<form name="journal_add" method="post" action="<?php echo plugin_page('journal_add.php')?>">
 <input type="hidden" name="bug_id" value="<?php echo $p_bug_id ?>" />
 <table class="width100" cellspacing="1">
 <tr>
@@ -88,12 +124,12 @@ function print_worktype_option_list( $p_worktype_id = 0, $p_project_id = null ) 
 		Jobs: 
 		<select name="worktype_id">
 				<?php
-					print_worktype_option_list( 0 );
+					print_worktype_option_list( '0' );
 				?>
 		</select>
 	</td>
 	<td width="25%">
-		man-days<input type='text' />
+		man-days<input name='man_day' type='text' />
 	</td>
 </tr>
 

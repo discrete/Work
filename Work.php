@@ -86,7 +86,7 @@ class WorkPlugin extends MantisPlugin {
 	}
 	
 	function list_unitwork($p_event, $p_bug_id){
-		include('Work_view_inc.php');
-		include('Work_add_inc.php');
+		include('pages/journal_view_inc.php');
+		include('pages/journal_addform_inc.php');
 	} #end of display_work
 }
