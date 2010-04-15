@@ -136,7 +136,7 @@ function print_worktype_option_list( $p_worktype_id = 0, $p_project_id = null ) 
 <!-- ?php event_signal( 'EVENT_WORK_ADD_FORM', array( $p_bug_id ) ); ?-->
 <tr>
 	<td class="center" colspan="2">
-		<input type="submit" class="button" value="Add Work"  onclick="this.disabled=1;document.bugnoteadd.submit();" />
+		<input type="submit" class="button" value="Add Work"  onclick="this.disabled=1;document.journal_add.submit();" />
 	</td>
 </tr>
 </table>

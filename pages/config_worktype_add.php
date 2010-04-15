@@ -88,7 +88,7 @@ function worktype_add( $p_author_id, $p_project_id, $p_name ) {
 	form_security_purge( 'manage_proj_cat_add' );
 
 	if ( $f_project_id == ALL_PROJECTS ) {
-		$t_redirect_url = plugin_page('config.php');/* 'manage_proj_page.php';*/
+		$t_redirect_url = 'plugin.php?page=Work/config.php'; /* plugin_page('config.php'); */ /* 'manage_proj_page.php';*/
 	} else {
 		$t_redirect_url = 'manage_proj_edit_page.php?project_id=' . $f_project_id;
 	}

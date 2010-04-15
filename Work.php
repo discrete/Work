@@ -72,7 +72,7 @@ class WorkPlugin extends MantisPlugin {
 					author_id		I		NOTNULL UNSIGNED DEFAULT '0',
 					project_id		I		NOTNULL UNSIGNED DEFAULT '0',
 					work_id			I		NOTNULL UNSIGNED DEFAULT '0',
-					man_day			I		NOTNULL UNSIGNED DEFAULT '0',
+					man_day			F		NOTNULL DEFAULT '0.0',
 					date_submitted	T		NOTNULL,
 					date_updated	T		NOTNULL
 				" )
